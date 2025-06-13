@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Grade System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Student Grade System</h1>
+        </div>
+
+        <div class="form-section">
+            <div id="message"></div>
+
+            <div class="from-grid">
+                <div class="form-group">
+                    <label for="name">Student Name</label>
+                    <input type="text" id="name" placeholder="Enter student name">
+                </div>
+                <div class="form-group">
+                    <label for="course">Course Name</label>
+                    <input type="text" id="course" placeholder="Enter course name">
+                </div>
+                <div class="form-group">
+                    <label for="score">Score</label>
+                    <input type="text" id="score" placeholder="Enter score">
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-add" onclick="addRecord()">
+                        Add record
+                    </button>
+                    <button class="btn btn-clear" onclick="clearAllRecord()">
+                        Delete record
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-section">
+                <div class="table-container">
+                    <table id="recordTable">
+                        <thead>
+                            <tr>
+                                <th>Student name</th>
+                                <th>Course name</th>
+                                <th>Score</th>
+                                <th>Grade</th>
+                                <th>Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+        let records = JSON.parse(localStorage.getItem('studentRecords')) || [];
+
+        //save records to localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('studentRecords', JSON.stringify(records));
+        }
+
+        function calculateGrade(score) {
+            if (score >= 90) return 'A';
+            if (score >= 80) return 'B';
+            if (score >= 70) return 'C';
+            if (score >= 60) return 'D';
+            return 'F';
+        }
+
+        //render table dari array
+        function renderTable() {
+            const tbody = document.querySelector('#recordTable tbody');
+            tbody.innerHTML = '';
+            records.forEach((record, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                <td>${record.name}</td>
+                <td>${record.course}</td>
+                <td>${record.score}</td>
+                <td>${calculateGrade(record.score)}</td>
+                <td><button class="delete-btn" onclick="deleteRecord(${index})">Delete</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        //add new records
+        function addRecord() {
+            const name = document.getElementById('name').value.trim();
+            const course = document.getElementById('course').value.trim();
+            const score = document.getElementById('score').value.trim();
+
+            if(!name) {
+                alert('Name cannot be empty!');
+                return;
+            }
+
+            if(!course){
+                alert('Course cannot be empty!');
+                return;
+            }
+
+            if (isNaN(score)) {
+                alert('Score cannot be empty!');
+                return;
+            }
+
+            records.push({name, course, score});
+            saveToLocalStorage();
+            renderTable();
+
+            //clear
+            document.getElementById('name').value = '';
+            document.getElementById('course').value = '';
+            document.getElementById('score').value = '';
+        }
+       
+        //delete
+        function deleteRecord(index) {
+            if (confirm('Delete this record?')) {
+                records.splice(index, 1);
+                saveToLocalStorage();
+                renderTable();
+            }
+        }
+
+        //clear semua records
+        function clearAllRecord() {
+            if (confirm('Clear all records?')){
+                records = [];
+                saveToLocalStorage();
+                renderTable();
+            }
+        }
+
+        window.onload = renderTable();
+    </script>
+</body>
+</html>
